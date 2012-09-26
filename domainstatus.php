@@ -1,4 +1,15 @@
 <?php
+/**
+ * @package PHP_Whois
+ */
+/*
+Plugin Name: Domain Status
+Plugin URI: http://skylinedesign.co.ke/labs/domain-status/
+Description: A simple plugin that keeps you informed concerning your domain status, and alerts you when renewal is due.
+Author: Huston Malande, Brian Wangila
+Version: 1.0
+Author URI: http://skylinedesign.co.ke/martians/
+*/
 
 class DomainStatus {
 	var $domain = '';
