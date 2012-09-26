@@ -86,4 +86,46 @@ function domain_status_css() {
 // hook up the CSS
 add_action( 'admin_head', 'domain_status_css' );
 
+
+// options page
+add_action('admin_menu', function() {
+
+add_options_page('Domain Status Settings', 'Domain Status', 'administrator', __FILE__, function () {
+	?>
+	<div class="wrap">
+		<?php screen_icon(); ?>
+		<h2>Domain Status Settings</h2>
+		<?php 
+		$domain_list_saved = get_option('$domain_list_op');
+		if(isset($_POST['Submit'])) {
+			$domain_list_saved = $_POST["domain_list"];
+			update_option( '$domain_list_op', $domain_list_saved ); ?>
+			<div class="updated">
+				<p><strong><?php _e('Options saved.', 'mt_trans_domain' ); ?></strong></p>
+			</div>
+		<?php } ?>
+
+		<form method="post" name="options" action="">
+		<br />
+		<table width="100%" class="form-table">
+			<tr>
+				<th scope="row"><strong>Domains</strong></th>
+				<td>
+					<p>List of domains you'd like to monitor (max 10, each on a new line)</p>
+					<p><textarea name="domain_list" rows="5" cols="50"><?php echo $domain_list_saved; ?></textarea></p>
+				</td> 
+			</tr>
+		</table>
+		<p class="submit">
+			<input type="submit" name="Submit" value="Update" class="button-primary" />
+		</p>
+		</form>
+	</div>
+	<?php
+}); 
+
+
+});
+
+
 ?>
