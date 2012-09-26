@@ -1,5 +1,4 @@
-<?php
-/**
+<?php /**
  * @package PHP_Whois
  */
 /*
@@ -41,12 +40,51 @@ class DomainStatus {
 
 	function format_expiry() {
 		$this->expiry_date = strtotime($this->expiry_date);
-		$this->expiry_date = date('l jS F Y', $this->expiry_date);
+		// format 'l jS F Y'
+		$this->expiry_date = date('jS F Y', $this->expiry_date);
 	}
 }
 
-// Test
-$d = new DomainStatus('bwangila.com');
-echo $d->expiry_date
+function domain_status($domain) {
+	if ( !isset($domain) || $domain == NULL) {
+		// uncomment the line below for live use
+		// $domain = str_replace("www.","", $_SERVER['HTTP_HOST']);
+		// comment the line below for live use
+		$domain = 'bwangila.com';
+	}
+	
+	// output
+	$d = new DomainStatus($domain);
+	echo "<p id='dstatus'>Domain renewal: " . $d->expiry_date . "</p>";
+
+}
+
+// hook up the output
+add_action( 'admin_notices', 'domain_status' );
+
+// CSS to position the paragraph
+function domain_status_css() {
+	// makes sure positioning is also good for right-to-left languages
+	$x = is_rtl() ? 'left' : 'right';
+
+	echo "
+	<style type='text/css'>
+	#dstatus {
+		float: right;
+		padding: 3px 15px 2px;
+		margin: 0;
+		font-size: 11px;
+		background: #F8F8F8;
+		border-bottom-left-radius: 3px;
+		border-bottom-right-radius: 3px;
+		border: 1px solid #EEE;
+	}
+	</style>
+	";
+}
+
+// hook up the CSS
+add_action( 'admin_head', 'domain_status_css' );
+
 
 ?>
