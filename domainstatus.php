@@ -86,5 +86,4 @@ function domain_status_css() {
 // hook up the CSS
 add_action( 'admin_head', 'domain_status_css' );
 
-
 ?>
