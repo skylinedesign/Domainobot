@@ -16,7 +16,7 @@ class DomainStatus {
 	var $expiry_date = '';
 
 	function __construct($domain = '') {
-		include('whois.main.php');
+		include('lib/whois.main.php');
 		$this->set_domain($domain);
 		$this->get_expiry();
 	}
