@@ -10,13 +10,16 @@ Version: 1.0
 Author URI: http://skylinedesign.co.ke/martians/
 */
 
+// include whois class
+include('lib/whois.main.php');
+
+// define querying class
 class DomainStatus {
 	var $domain = '';
 	var $result = '';
 	var $expiry_date = '';
 
 	function __construct($domain = '') {
-		include('lib/whois.main.php');
 		$this->set_domain($domain);
 		$this->get_expiry();
 	}
@@ -45,61 +48,63 @@ class DomainStatus {
 	}
 }
 
-function domain_status($domain) {
-	if ( !isset($domain) || $domain == NULL) {
-		// uncomment the line below for live use
-		// $domain = str_replace("www.","", $_SERVER['HTTP_HOST']);
-		// comment the line below for live use
-		$domain = 'bwangila.com';
-	}
+
+// check if we need to display the auto-detected,
+// current domain status on the top-right
+$current  = get_option('domain_show_current_op');
+if ($current == 1) {
 	
-	// output
-	$d = new DomainStatus($domain);
-	echo "<p id='dstatus'>Domain renewal: " . $d->expiry_date . "</p>";
-
-}
-
-// hook up the output
-add_action( 'admin_notices', 'domain_status' );
-
-// CSS to position the paragraph
-function domain_status_css() {
-	// makes sure positioning is also good for right-to-left languages
-	$x = is_rtl() ? 'left' : 'right';
-
-	echo "
-	<style type='text/css'>
-	#dstatus {
-		float: right;
-		padding: 3px 15px 2px;
-		margin: 0;
-		font-size: 11px;
-		background: #F8F8F8;
-		border-bottom-left-radius: 3px;
-		border-bottom-right-radius: 3px;
-		border: 1px solid #EEE;
+	// function for output
+	function current_domain_status() {
+		// $domain = 'put_your_test_domain_here_and_uncomment';
+		// output
+		$domain_status = new DomainStatus($domain);
+		echo "<p id='dstatus'>Domain renewal: " . $domain_status->expiry_date . "</p>";
 	}
-	</style>
-	";
-}
 
-// hook up the CSS
-add_action( 'admin_head', 'domain_status_css' );
+	// hook up the output
+	add_action( 'admin_notices', 'current_domain_status' );
+
+	// CSS to position the paragraph
+	function domain_status_css() {
+		// makes sure positioning is also good for right-to-left languages
+		$x = is_rtl() ? 'left' : 'right';
+	
+		echo "
+		<style type='text/css'>
+		#dstatus {
+			float: right;
+			padding: 3px 15px 2px;
+			margin: 0;
+			font-size: 11px;
+			background: #F8F8F8;
+			border-bottom-left-radius: 3px;
+			border-bottom-right-radius: 3px;
+			border: 1px solid #EEE;
+		}
+		</style>
+		";
+	}
+
+	// hook up the CSS
+	add_action( 'admin_head', 'domain_status_css' );
+
+}
 
 
 // options page
-add_action('admin_menu', function() {
+function domain_status_options_page() { ?>
 
-add_options_page('Domain Status Settings', 'Domain Status', 'administrator', __FILE__, function () {
-	?>
 	<div class="wrap">
 		<?php screen_icon(); ?>
 		<h2>Domain Status Settings</h2>
 		<?php 
-		$domain_list_saved = get_option('$domain_list_op');
+		$domain_list_saved = get_option('domain_list_op');
 		if(isset($_POST['Submit'])) {
 			$domain_list_saved = $_POST["domain_list"];
-			update_option( '$domain_list_op', $domain_list_saved ); ?>
+			$domain_show_current_saved = $_POST["domain_show_current"];
+			update_option( 'domain_list_op', $domain_list_saved );
+			update_option( 'domain_show_current_op', $domain_show_current_saved ); ?>
 			<div class="updated">
 				<p><strong><?php _e('Options saved.', 'mt_trans_domain' ); ?></strong></p>
 			</div>
@@ -109,10 +114,16 @@ add_options_page('Domain Status Settings', 'Domain Status', 'administrator', __F
 		<br />
 		<table width="100%" class="form-table">
 			<tr>
-				<th scope="row"><strong>Domains</strong></th>
+				<th scope="row">Domains</th>
 				<td>
-					<p>List of domains you'd like to monitor (max 10, each on a new line)</p>
+					<p>List of domains you'd like to monitor on the Dashboard. Place each on a new line.</p>
 					<p><textarea name="domain_list" rows="5" cols="50"><?php echo $domain_list_saved; ?></textarea></p>
+				</td> 
+			</tr>
+			<tr>
+				<th scope="row">Current Domain</th>
+				<td>
+					<p><input type="checkbox" name="domain_show_current" value="1" <?php checked(true, get_option('domain_show_current_op')); ?> /> Show current domain (top right)</p>
 				</td> 
 			</tr>
 		</table>
@@ -121,11 +132,40 @@ add_options_page('Domain Status Settings', 'Domain Status', 'administrator', __F
 		</p>
 		</form>
 	</div>
-	<?php
-}); 
+	
+<?php }
+
+// add options
+function domain_status_options() {
+	add_options_page('Domain Status Settings', 'Domain Status', 'administrator', __FILE__, 'domain_status_options_page'); 
+}
+
+// hook up options page
+add_action('admin_menu', 'domain_status_options');
 
 
-});
+// dashboard widget output
+function domain_dashboard_widget() {
+	// retrieve option
+	$domain_list = get_option("domain_list_op");
+	if ($domain_list != NULL) {
+		$domain_array = explode("\n", $domain_list);
+		foreach ($domain_array as $domain) {
+			$domain_status = new DomainStatus($domain);
+			echo "<p>" . $domain . ": " . $domain_status->expiry_date . "</p>";
+		}
+	} else {
+		echo "Add your list of domains on the <a href=\"" . menu_page_url( 'phpwhois/domainstatus.php', false ) . "\">settings page</a>.";
+	}
+	
+} 
 
+// add dashboard widget
+function domain_add_dashboard_widgets() {
+	wp_add_dashboard_widget('domain_dashboard_widget', 'Domain Status', 'domain_dashboard_widget');	
+} 
+
+// hook up dashboard widget
+add_action('wp_dashboard_setup', 'domain_add_dashboard_widgets' ); 
 
 ?>
