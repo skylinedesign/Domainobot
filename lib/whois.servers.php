@@ -87,7 +87,6 @@ $this->WHOIS_SPECIAL = array(
 		'fj'	 => 'whois.usp.ac.fj',
 		'fm'     => 'http://www.dot.fm/query_whois.cfm?domain={domain}&tld=fm',
 		'jobs'	 => 'jobswhois.verisign-grs.com',
-		'ke'	 => 'kenic.or.ke',
 		'la'	 => 'whois.centralnic.net',
 		'gr'	 => '',
 		'gs'     => 'http://www.adamsnames.tc/whois/?domain={domain}.gs',

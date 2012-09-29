@@ -1,0 +1,26 @@
+#domain-status {
+	float: right;
+	border: 1px solid #EEE;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+	padding: 3px 15px 2px;
+	margin: 0;
+	background: #F8F8F8;
+	font-size: 11px;
+}
+
+#domain-table tr {
+	border-bottom: 1px solid #EEE;
+}
+
+#domain-table tr:last-child {
+	border-bottom: none;
+}
+
+.form-table th {
+	padding: 9px;
+}
+
+.form-table td {
+	padding: 7px 10px;
+}
