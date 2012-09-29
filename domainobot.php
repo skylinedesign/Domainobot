@@ -214,7 +214,7 @@ function domainobot_dashboard_widget() {
 
 //	add dashboard widget
 function domainobot_add_dashboard_widget() {
-	wp_add_dashboard_widget( 'domainobot_dashboard_widget', 'Renewal Dates <small>- Domainobot</small>', 'domainobot_dashboard_widget' );	
+	wp_add_dashboard_widget( 'domainobot_dashboard_widget', 'Renewal Tracker <small>- Domainobot &trade;</small>', 'domainobot_dashboard_widget' );	
 } 
 
 //	hook up dashboard widget
