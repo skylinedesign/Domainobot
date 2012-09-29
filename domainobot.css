@@ -1,4 +1,4 @@
-#domain-status {
+#domainobot-bar {
 	float: right;
 	border: 1px solid #EEE;
 	border-bottom-left-radius: 3px;
@@ -9,11 +9,11 @@
 	font-size: 11px;
 }
 
-#domain-table tr {
+#domainobot-table tr {
 	border-bottom: 1px solid #EEE;
 }
 
-#domain-table tr:last-child {
+#domainobot-table tr:last-child {
 	border-bottom: none;
 }
 

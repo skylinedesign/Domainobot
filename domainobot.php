@@ -1,16 +1,12 @@
 <?php
-/**
- * @package DomainStatus
- * 
- */
-
 /*
-Plugin Name: Domain Status
-Plugin URI: http://skylinedesign.co.ke/labs/domain-status
-Description: A simple plugin that keeps you informed concerning your domain's status, and alerts you when renewal is due
-Author: Huston Malande & Brian Wangila
+Plugin Name: Domainobot
+Plugin URI: http://domainobot.com
+Description: A simple plugin that keeps you informed concerning your domain status, and alerts you when renewal is due
+Author: Huston Malande, Brian Wangila
 Version: 1.0
 Author URI: http://skylinedesign.co.ke/martians
+License: GPL2
 */
 
 
@@ -69,71 +65,71 @@ class DomainStatus {
 /**	Cron jobs */
 
 //	upon activation
-register_activation_hook( __FILE__, 'domain_status_activation' );
+register_activation_hook( __FILE__, 'domainobot_activation' );
 
-function domain_status_activation() {
-	wp_schedule_event( current_time( 'timestamp' ), 'daily', 'whois_update' );
+function domainobot_activation() {
+	wp_schedule_event( current_time( 'timestamp' ), 'daily', 'domainobot_whois_update' );
 }
 
-function update_whois_daily() {
+function domainobot_update_whois_daily() {
 	// run every 24hrs
 	$domain_status = new DomainStatus( $domain );
 	$domain_expiry = $domain_status->expiry_date;
-	update_option( 'domain_current_expiry', $domain_expiry );
+	update_option( 'domainobot_current_expiry_op', $domain_expiry );
 }
 
-add_action( 'whois_update', 'update_whois_daily' );
+add_action( 'domainobot_whois_update', 'domainobot_update_whois_daily' );
 
 
 /**	Cleaning up */
 
 //	clean up after deactivation
-register_deactivation_hook( __FILE__, 'domain_status_deactivation' );
+register_deactivation_hook( __FILE__, 'domainobot_deactivation' );
 
-function domain_status_deactivation() {
+function domainobot_deactivation() {
 	// clear cron
-	wp_clear_scheduled_hook( 'whois_update' );
-	delete_option( 'domain_show_current_op' );
-	delete_option( 'domain_current_expiry' );
+	wp_clear_scheduled_hook( 'domainobot_whois_update' );
+	delete_option( 'domainobot_show_current_op' );
+	delete_option( 'domainobot_current_expiry_op' );
 }
 
 //	clean up after deletion
-register_uninstall_hook( __FILE__, 'domain_status_deletion' );
+register_uninstall_hook( __FILE__, 'domainobot_deletion' );
 
-function domain_status_deletion() {
+function domainobot_deletion() {
 	// clear db values
-	delete_option( 'domain_list_op' );
+	delete_option( 'domainobot_list_op' );
 }
 
 
 /**	Stylesheets */
 
 //	css file
-function domain_status_css() {
-	wp_register_style( 'domain-status-style', plugins_url( 'domainstatus.css', __FILE__ ) );
-	wp_enqueue_style( 'domain-status-style' );	
+function domainobot_css() {
+	wp_register_style( 'domainobot-style', plugins_url( 'domainobot.css', __FILE__ ) );
+	wp_enqueue_style( 'domainobot-style' );	
 }
 
 //	hook up the css
-add_action( 'admin_print_styles', 'domain_status_css' );
+add_action( 'admin_print_styles', 'domainobot_css' );
 
 
 /**	Current Domain */
 
 /* 	check if we need to display the auto-detected,
 	current domain status on the top-right */
-$current  = get_option( 'domain_show_current_op' );
+$current  = get_option( 'domainobot_show_current_op' );
 if ($current == 1) {
 	
 	// function for output
-	function current_domain_status() {
+	function domainobot_current_domain() {
 		// $domain = 'put_your_test_domain_here_and_uncomment';
 		$domain_status = new DomainStatus( $domain );
-		echo "<p id='domain-status'>Domain renewal: " . $domain_status->expiry_date . "</p>";
+		echo "<p id='domainobot-bar'>Domain renewal: " . $domain_status->expiry_date . "</p>";
 	}
 
 	// hook up the output
-	add_action( 'admin_notices', 'current_domain_status' );
+	add_action( 'admin_notices', 'domainobot_current_domain' );
 
 }
 
@@ -141,18 +137,18 @@ if ($current == 1) {
 /**	Options */
 
 //	options page
-function domain_status_options_page() { ?>
+function domainobot_options_page() { ?>
 
 	<div class="wrap">
 		<?php screen_icon(); ?>
-		<h2>Domain Status Settings</h2>
+		<h2>Domainobot Settings</h2>
 		<?php 
-		$domain_list_saved = get_option( 'domain_list_op' );
+		$domainobot_list_saved = get_option( 'domainobot_list_op' );
 		if( isset( $_POST['Submit'] ) ) {
-			$domain_list_saved = $_POST["domain_list"];
-			$domain_show_current_saved = $_POST["domain_show_current"];
-			update_option( 'domain_list_op', $domain_list_saved );
-			update_option( 'domain_show_current_op', $domain_show_current_saved ); ?>
+			$domainobot_list_saved = $_POST["domainobot_list"];
+			$domainobot_show_current_saved = $_POST["domainobot_show_current"];
+			update_option( 'domainobot_list_op', $domainobot_list_saved );
+			update_option( 'domainobot_show_current_op', $domainobot_show_current_saved ); ?>
 			<div class="updated">
 				<p><strong><?php _e( 'Options saved.', 'mt_trans_domain' ); ?></strong></p>
 			</div>
@@ -165,13 +161,13 @@ function domain_status_options_page() { ?>
 				<th scope="row">Domains</th>
 				<td>
 					<p>List of domains you'd like to monitor on the Dashboard. Place each on a new line.</p>
-					<p><textarea name="domain_list" rows="5" cols="50"><?php echo $domain_list_saved; ?></textarea></p>
+					<p><textarea name="domainobot_list" rows="5" cols="50"><?php echo $domainobot_list_saved; ?></textarea></p>
 				</td> 
 			</tr>
 			<tr>
 				<th scope="row">Current Domain</th>
 				<td>
-					<p><input type="checkbox" name="domain_show_current" value="1" <?php checked( true, get_option( 'domain_show_current_op' ) ); ?> /> Show current domain (top right)</p>
+					<p><input type="checkbox" name="domainobot_show_current" value="1" <?php checked( true, get_option( 'domainobot_show_current_op' ) ); ?> /> Show current domain (top right)</p>
 				</td> 
 			</tr>
 		</table>
@@ -184,25 +180,25 @@ function domain_status_options_page() { ?>
 <?php }
 
 //	add options
-function domain_status_options() {
-	add_options_page( 'Domain Status Settings', 'Domain Status', 'administrator', __FILE__, 'domain_status_options_page' ); 
+function domainobot_options() {
+	add_options_page( 'Domainobot Settings', 'Domainobot', 'administrator', __FILE__, 'domainobot_options_page' ); 
 }
 
 //	hook up options page
-add_action( 'admin_menu', 'domain_status_options' );
+add_action( 'admin_menu', 'domainobot_options' );
 
 
 /**	Dashboard */
 
 //	dashboard widget output
-function domain_dashboard_widget() {
+function domainobot_dashboard_widget() {
 	// retrieve option
-	$domain_list = get_option( 'domain_list_op' );
-	if ( $domain_list != NULL ) {
+	$domainobot_list = get_option( 'domainobot_list_op' );
+	if ( $domainobot_list != NULL ) {
 		
-		$domain_array = explode( "\n", $domain_list );
+		$domain_array = explode( "\n", $domainobot_list );
 		
-		echo '<table id="domain-table" width="100%" class="form-table" cellpadding="1px">';
+		echo '<table id="domainobot-table" width="100%" class="form-table" cellpadding="1px">';
 		foreach ( $domain_array as $domain ) { 
 			$domain_status = new DomainStatus( $domain );
 			echo '<tr><th scope="row">' . $domain . '</th><td>' . $domain_status->expiry_date . '</td></tr>';
@@ -211,15 +207,15 @@ function domain_dashboard_widget() {
 		echo '</table>';
 		
 	} else {
-		echo 'Add your list of domains on the <a href="' . menu_page_url( 'phpwhois/domainstatus.php', false ) . '">settings page</a>.';
+		echo 'Add your list of domains on the <a href="' . menu_page_url( 'domainobot/domainobot.php', false ) . '">settings page</a>.';
 	}
 	
 } 
 
 //	add dashboard widget
-function domain_add_dashboard_widgets() {
-	wp_add_dashboard_widget( 'domain_dashboard_widget', 'Domain Status', 'domain_dashboard_widget' );	
+function domainobot_add_dashboard_widget() {
+	wp_add_dashboard_widget( 'domainobot_dashboard_widget', 'Renewal Dates <small>- Domainobot</small>', 'domainobot_dashboard_widget' );	
 } 
 
 //	hook up dashboard widget
-add_action( 'wp_dashboard_setup', 'domain_add_dashboard_widgets' );
+add_action( 'wp_dashboard_setup', 'domainobot_add_dashboard_widget' );
