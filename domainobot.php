@@ -125,7 +125,7 @@ if ($current == 1) {
 	function domainobot_current_domain() {
 		// $domain = 'put_your_test_domain_here_and_uncomment';
 		$domain_status = new DomainStatus( $domain );
-		echo "<p id='domainobot-bar'>Domain renewal: " . $domain_status->expiry_date . "</p>";
+		echo "<p id='domainobot-bar'>Domain renewal: " . esc_html( $domain_status->expiry_date ) . "</p>";
 	}
 
 	// hook up the output
@@ -161,7 +161,7 @@ function domainobot_options_page() { ?>
 				<th scope="row">Domains</th>
 				<td>
 					<p>List of domains you'd like to monitor on the Dashboard. Place each on a new line.</p>
-					<p><textarea name="domainobot_list" rows="5" cols="50"><?php echo $domainobot_list_saved; ?></textarea></p>
+					<p><textarea name="domainobot_list" rows="5" cols="50"><?php echo esc_textarea( $domainobot_list_saved ); ?></textarea></p>
 				</td> 
 			</tr>
 			<tr>
@@ -201,7 +201,7 @@ function domainobot_dashboard_widget() {
 		echo '<table id="domainobot-table" width="100%" class="form-table" cellpadding="1px">';
 		foreach ( $domain_array as $domain ) { 
 			$domain_status = new DomainStatus( $domain );
-			echo '<tr><th scope="row">' . $domain . '</th><td>' . $domain_status->expiry_date . '</td></tr>';
+			echo '<tr><th scope="row"><a href="'. esc_url( $domain ) .'">' . esc_html( $domain ) . '</a></th><td>' . esc_html( $domain_status->expiry_date ) . '</td></tr>';
 		}		
 		
 		echo '</table>';
