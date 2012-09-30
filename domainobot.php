@@ -91,6 +91,7 @@ function domainobot_deactivation() {
 	wp_clear_scheduled_hook( 'domainobot_whois_update' );
 	delete_option( 'domainobot_show_current_op' );
 	delete_option( 'domainobot_current_expiry_op' );
+	delete_option( 'domainobot_days_left_op' );
 }
 
 //	clean up after deletion
@@ -144,11 +145,14 @@ function domainobot_options_page() { ?>
 		<h2>Domainobot Settings</h2>
 		<?php 
 		$domainobot_list_saved = get_option( 'domainobot_list_op' );
+		$domainobot_days_left_saved = get_option( 'domainobot_days_left_op' );
 		if( isset( $_POST['Submit'] ) ) {
 			$domainobot_list_saved = $_POST["domainobot_list"];
 			$domainobot_show_current_saved = $_POST["domainobot_show_current"];
+			$domainobot_days_left_saved = $_POST["domainobot_days_left"];
 			update_option( 'domainobot_list_op', $domainobot_list_saved );
-			update_option( 'domainobot_show_current_op', $domainobot_show_current_saved ); ?>
+			update_option( 'domainobot_show_current_op', $domainobot_show_current_saved );
+			update_option( 'domainobot_days_left_op', $domainobot_days_left_saved ); ?>
 			<div class="updated">
 				<p><strong><?php _e( 'Options saved.', 'mt_trans_domain' ); ?></strong></p>
 			</div>
@@ -165,9 +169,16 @@ function domainobot_options_page() { ?>
 				</td> 
 			</tr>
 			<tr>
-				<th scope="row">Current Domain</th>
+				<th scope="row">Current domain</th>
 				<td>
 					<p><input type="checkbox" name="domainobot_show_current" value="1" <?php checked( true, get_option( 'domainobot_show_current_op' ) ); ?> /> Show current domain (top right)</p>
+				</td> 
+			</tr>
+			<tr>
+				<th scope="row">Days left</th>
+				<td>
+					<p>Highlight domains that have the following number of days left before they expire.</p>
+					<p><input type="number" name="domainobot_days_left" value="<?php echo esc_html( $domainobot_days_left_saved ); ?>" min="0" max="90" /></p>
 				</td> 
 			</tr>
 		</table>
