@@ -43,18 +43,18 @@ function extract_cctld_expiry( $domain, $cctld_server ) {
 	$output = '';
 	
 	// connect to whois server:
-	if ( $conn = fsockopen ( $cctld_server, 43 ) ) {
+	if ( $conn = @fsockopen ( $cctld_server, 43 ) ) {
 		fputs( $conn, $domain."\r\n" );
 		while( ! feof( $conn ) ) {
 			$output .= fgets( $conn, 128 );
 		}
 		fclose( $conn );
 	}
-	else { die( 'Error: Could not connect to ' . $cctld_server . '!' ); }
+	else { echo '<p class="domainobot_error">server connection error: <em> ' . $cctld_server . '</em></p>'; }
 	
 	// extract expiry date
-	$pos = strpos($output, 'Expires: ');
-	$expiry_date = substr($output, $pos+9, 11);
+	$pos = strpos( $output, 'Expires: ' );
+	$expiry_date = substr( $output, $pos + 9, 11 );
 	
 	return $expiry_date;
 	

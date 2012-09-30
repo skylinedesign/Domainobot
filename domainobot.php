@@ -53,14 +53,30 @@ class DomainStatus {
 		
 		// format date
 		$this->format_expiry();
+		
+		// get highlight class
+		$this->highlight_class();
 	}
 
 	function format_expiry() {
 		$this->expiry_date = strtotime( $this->expiry_date );
 		$this->expiry_date = date( 'jS F Y', $this->expiry_date );
 	}
+	
+	function highlight_class() {
+		$now = time();
+		$time_diff = $this->expiry_date - $now;
+		$days_diff = intval( $time_diff / ( 60 * 60 * 24 ) );
+		
+		if ( $days_diff < 0 ) {
+			$this->highlight_class = esc_attr( 'expired' );
+		} elseif ( $days_diff > 0 && $days_diff < $days_left_op ) {
+			$this->highlight_class = esc_attr( 'soon' );
+		} else {
+			$this->highlight_class = esc_attr( 'safe' );
+		}
+	}
 }
-
 
 /**	Cron jobs */
 
@@ -103,11 +119,20 @@ function domainobot_deletion() {
 }
 
 
+/**	Global settings */
+
+/* 	extract 'days left' option */
+$days_left_op = get_option( 'domainobot_days_left_op' );
+
+/* 	extract 'current domain' option */
+$show_current  = get_option( 'domainobot_show_current_op' );
+
+
 /**	Stylesheets */
 
 //	css file
 function domainobot_css() {
-	wp_register_style( 'domainobot-style', plugins_url( 'domainobot.css', __FILE__ ) );
+	wp_register_style( 'domainobot-style', plugins_url( 'assets/domainobot.css', __FILE__ ) );
 	wp_enqueue_style( 'domainobot-style' );	
 }
 
@@ -119,14 +144,14 @@ add_action( 'admin_print_styles', 'domainobot_css' );
 
 /* 	check if we need to display the auto-detected,
 	current domain status on the top-right */
-$current  = get_option( 'domainobot_show_current_op' );
-if ($current == 1) {
+	
+if ($show_current == 1) {
 	
 	// function for output
 	function domainobot_current_domain() {
 		// $domain = 'put_your_test_domain_here_and_uncomment';
 		$domain_status = new DomainStatus( $domain );
-		echo "<p id='domainobot-bar'>Domain renewal: " . esc_html( $domain_status->expiry_date ) . "</p>";
+		echo '<p id="domainobot-bar" class="' . $domain_status->highlight_class . '">Domain renewal: ' . esc_html( $domain_status->expiry_date ) . '</p>';
 	}
 
 	// hook up the output
@@ -150,6 +175,7 @@ function domainobot_options_page() { ?>
 			$domainobot_list_saved = $_POST["domainobot_list"];
 			$domainobot_show_current_saved = $_POST["domainobot_show_current"];
 			$domainobot_days_left_saved = $_POST["domainobot_days_left"];
+			intval( $domainobot_days_left_saved );
 			update_option( 'domainobot_list_op', $domainobot_list_saved );
 			update_option( 'domainobot_show_current_op', $domainobot_show_current_saved );
 			update_option( 'domainobot_days_left_op', $domainobot_days_left_saved ); ?>
@@ -159,7 +185,7 @@ function domainobot_options_page() { ?>
 		<?php } ?>
 
 		<form method="post" name="options" action="">
-		<br />
+		<br /><?php var_dump( $days_left_op ); ?>
 		<table width="100%" class="form-table">
 			<tr>
 				<th scope="row">Domains</th>
@@ -210,9 +236,15 @@ function domainobot_dashboard_widget() {
 		$domain_array = explode( "\n", $domainobot_list );
 		
 		echo '<table id="domainobot-table" width="100%" class="form-table" cellpadding="1px">';
-		foreach ( $domain_array as $domain ) { 
+		
+		foreach ( $domain_array as $domain ) {
+			 
 			$domain_status = new DomainStatus( $domain );
-			echo '<tr><th scope="row"><a href="'. esc_url( $domain ) .'">' . esc_html( $domain ) . '</a></th><td>' . esc_html( $domain_status->expiry_date ) . '</td></tr>';
+			
+			echo	'<tr class="'. $domain_status->highlight_class .'">
+						<th scope="row"><a href="'. esc_url( $domain ) .'">' . esc_html( $domain ) . '</a></th>
+						<td>' . esc_html( $domain_status->expiry_date ) . '</td>
+					</tr>';
 		}		
 		
 		echo '</table>';

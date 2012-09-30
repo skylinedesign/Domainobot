@@ -1,0 +1,49 @@
+#domainobot-bar {
+	float: right;
+	border: 1px solid #EEE;
+	border-top: none;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+	padding: 4px 15px 2px;
+	margin: 0;
+	background: #F8F8F8;
+	font-size: 11px;
+}
+
+#domainobot-bar.soon,
+#domainobot-bar.expired {
+	border-color: #CCC;
+	background: #FFE8E8;
+}
+
+#domainobot-table tr {
+	border-bottom: 1px solid #EEE;
+}
+
+#domainobot-table tr:last-child {
+	border-bottom: none;
+}
+
+#domainobot-table tr.soon {
+	color: #E66F00;
+}
+
+#domainobot-table tr.expired {
+	color: #F00;
+}
+
+.form-table th {
+	padding: 9px;
+}
+
+.form-table td {
+	padding: 7px 10px;
+}
+
+.domainobot_error {
+	padding: 5px 33px 5px;
+	margin: 0;
+	border-bottom: 1px solid #EEE;
+	background: url(error.png) no-repeat 9px center;
+	color: #555;
+}
