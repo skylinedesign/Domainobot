@@ -18,17 +18,18 @@ include( 'lib/whois.custom.php' );
 
 //	define querying class
 class DomainStatus {
-	var $domain      = '';
-	var $result      = '';
-	var $expiry_date = '';
-	var $errors      = array();
 
-	function __construct( $domain = '' ) {
+	private $domain    	= '';
+	var $expiry_date    = '';
+	var $days_to_expiry = '';
+	var $errors         = array();
+
+	public function __construct( $domain = '' ) {
 		$this->set_domain( $domain );
 		$this->get_expiry();
 	}
 
-	function set_domain( $domain = '' ) {
+	public function set_domain( $domain = '' ) {
 		if ( ! empty( $domain ) && $domain != '' ) {
 
 			$domain = strtolower( trim( $domain ));
@@ -45,8 +46,7 @@ class DomainStatus {
 		}
 	}
 
-	function get_expiry() {
-		
+	public function get_expiry() {		
 		// run specific ccTLD's check first
 		$custom_cctld_expiry = custom_cctld_check( $this->domain );
 		
@@ -55,29 +55,26 @@ class DomainStatus {
 		} else {
 			// use phpwhois class
 			$whois = new Whois();
-			$this->result = $whois->Lookup( $this->domain );
-			$this->expiry_date = $this->result['regrinfo']['domain']['expires'];
-			$this->status = $this->result['regrinfo']['domain']['status'];
+			$result = $whois->Lookup( $this->domain );
+			$this->expiry_date = $result['regrinfo']['domain']['expires'];
+			$this->status = $result['regrinfo']['domain']['status'];
 		}
 		
 		// format date
-		$this->expiry_date = date( 'jS F Y', strtotime( $this->expiry_date ) );
+		$unix_expiry_date = strtotime( $this->expiry_date );
+		$this->expiry_date = date( 'jS F Y', $unix_expiry_date );
+		$this->days_to_expiry = intval(( $unix_expiry_date - time() ) / ( 60 * 60 * 24 ));
 
-		
 		// get highlight class
 		$this->highlight_class();
 	}
 	
-	function highlight_class() {
-		
-		$now = time();
-		$time_diff = strtotime( $this->expiry_date ) - $now;
-		$this->days_diff = intval( $time_diff / ( 60 * 60 * 24 ) );
+	private function highlight_class() {
 		$days_left_op = get_option( 'domainobot_days_left_op' );
 		
-		if ( $this->days_diff < 0 ) {
+		if ( $this->days_to_expiry < 0 ) {
 			$this->highlight_class = esc_attr( 'expired' );
-		} elseif ( $this->days_diff > 0 && $this->days_diff < $days_left_op ) {
+		} elseif ( $this->days_to_expiry > 0 && $this->days_to_expiry < $days_left_op ) {
 			$this->highlight_class = esc_attr( 'soon' );
 		} else {
 			$this->highlight_class = esc_attr( 'safe' );
@@ -274,7 +271,7 @@ function domainobot_dashboard_widget() {
 			if ( $domain_status->highlight_class == 'expired' ) {
 				$info = '<span>' . $domain_status->status . '</span>';
 			} elseif ( $domain_status->highlight_class == 'soon' ) {
-				$info = '<span>' . $domain_status->days_diff . ' days</span>';
+				$info = '<span>' . $domain_status->days_to_expiry . ' days</span>';
 			} else {
 				$info= '';
 			}
