@@ -19,7 +19,7 @@ include( 'lib/whois.custom.php' );
 //	define querying class
 class DomainStatus {
 
-	private $domain    	= '';
+	var $domain    	= '';
 	var $expiry_date    = '';
 	var $days_to_expiry = '';
 	var $errors         = array();
@@ -263,9 +263,16 @@ function domainobot_dashboard_widget() {
 		$domain_array = explode( "\n", $domainobot_list );
 		
 		echo '<table id="domainobot-table" width="100%" class="form-table" cellpadding="1px">';
-		
+
+		// VALIDATE DOMAINS
+		$domains = array();
 		foreach ( $domain_array as $domain ) {
-			 
+			if (validate_domain($domain)) {
+				$domains[] = $domain;
+			}
+		}
+
+		foreach ($domains as $domain) {
 			$domain_status = new DomainStatus( $domain );
 			
 			if ( $domain_status->highlight_class == 'expired' ) {
@@ -277,7 +284,7 @@ function domainobot_dashboard_widget() {
 			}
 			
 			echo	'<tr class="'. $domain_status->highlight_class .'">
-						<th scope="row"><a href="'. esc_url( $domain ) .'">' . esc_html( $domain ) . '</a></th>
+						<th scope="row"><a href="'. esc_url( $domain_status->domain ) .'">' . esc_html( $domain_status->domain ) . '</a></th>
 						<td>' . esc_html( $domain_status->expiry_date ) . ' ' . $info . '</td>
 					</tr>';
 		}		
@@ -297,3 +304,21 @@ function domainobot_add_dashboard_widget() {
 
 //	hook up dashboard widget
 add_action( 'wp_dashboard_setup', 'domainobot_add_dashboard_widget' );
+
+
+	function validate_domain( $domain ) {
+		if ( ! empty( $domain ) && $domain != '' ) {
+
+			$domain = strtolower( trim( $domain ));
+			$domain = preg_replace( '/^http:\/\//i', '', $domain );
+			$domain = preg_replace( '/^www\./i', '', $domain );
+			$domain = explode( '/', $domain );
+			$domain = trim( $domain[0] );
+
+			if ( preg_match('/^([A-Z0-9][A-Z0-9_-]*(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i', $domain )) {
+			     return $domain;
+			} else {
+				return FALSE;
+			}
+		}
+	}
