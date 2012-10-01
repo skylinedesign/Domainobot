@@ -18,9 +18,10 @@ include( 'lib/whois.custom.php' );
 
 //	define querying class
 class DomainStatus {
-	var $domain = '';
-	var $result = '';
+	var $domain      = '';
+	var $result      = '';
 	var $expiry_date = '';
+	var $errors      = array();
 
 	function __construct( $domain = '' ) {
 		$this->set_domain( $domain );
@@ -29,10 +30,18 @@ class DomainStatus {
 
 	function set_domain( $domain = '' ) {
 		if ( ! empty( $domain ) && $domain != '' ) {
-			$this->domain = $domain;
-		} else {
-			// auto-detect domain name
-			$this->domain = str_replace( "www.", "", $_SERVER['HTTP_HOST'] );
+
+			$domain = strtolower( trim( $domain ));
+			$domain = preg_replace( '/^http:\/\//i', '', $domain );
+			$domain = preg_replace( '/^www\./i', '', $domain );
+			$domain = explode( '/', $domain );
+			$domain = trim( $domain[0] );
+
+			if ( preg_match('/^([A-Z0-9][A-Z0-9_-]*(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i', $domain )) {
+			     $this->domain = $domain;
+			} else {
+				array_push( $this->errors, 'The domain, <strong>' . $domain . '</strong>, is not valid' );
+			}
 		}
 	}
 
@@ -46,28 +55,23 @@ class DomainStatus {
 		} else {
 			// use phpwhois class
 			$whois = new Whois();
-			$query = $this->domain;
-			$this->result = $whois->Lookup( $query );
+			$this->result = $whois->Lookup( $this->domain );
 			$this->expiry_date = $this->result['regrinfo']['domain']['expires'];
 			$this->status = $this->result['regrinfo']['domain']['status'];
 		}
 		
 		// format date
-		$this->format_expiry();
+		$this->expiry_date = date( 'jS F Y', strtotime( $this->expiry_date ) );
+
 		
 		// get highlight class
 		$this->highlight_class();
-	}
-
-	function format_expiry() {
-		$this->expiry_date_time = strtotime( $this->expiry_date );
-		$this->expiry_date = date( 'jS F Y', $this->expiry_date_time );
 	}
 	
 	function highlight_class() {
 		
 		$now = time();
-		$time_diff = $this->expiry_date_time - $now;
+		$time_diff = strtotime( $this->expiry_date ) - $now;
 		$this->days_diff = intval( $time_diff / ( 60 * 60 * 24 ) );
 		$days_left_op = get_option( 'domainobot_days_left_op' );
 		
@@ -80,7 +84,6 @@ class DomainStatus {
 		}
 	}
 }
-
 
 /**	Cron jobs */
 
