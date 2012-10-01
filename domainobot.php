@@ -68,10 +68,11 @@ class DomainStatus {
 		$now = time();
 		$time_diff = $this->expiry_date_time - $now;
 		$days_diff = intval( $time_diff / ( 60 * 60 * 24 ) );
+		$days_left = get_option( 'domainobot_days_left_op' );
 		
 		if ( $days_diff < 0 ) {
 			$this->highlight_class = esc_attr( 'expired' );
-		} elseif ( $days_diff > 0 && $days_diff < $days_left_op ) {
+		} elseif ( $days_diff > 0 && $days_diff < $days_left ) {
 			$this->highlight_class = esc_attr( 'soon' );
 		} else {
 			$this->highlight_class = esc_attr( 'safe' );
