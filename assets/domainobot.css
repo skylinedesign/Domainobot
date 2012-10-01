@@ -67,3 +67,11 @@
 	background: url(error.png) no-repeat 9px center;
 	color: #555;
 }
+
+a.no-underline {
+	text-decoration: none;
+}
+
+a.no-underline:hover {
+	text-decoration: underline;
+}
