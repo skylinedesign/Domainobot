@@ -2,8 +2,8 @@
 /*
 Plugin Name: Domainobot
 Plugin URI: http://domainobot.com
-Description: A simple plugin that keeps you informed concerning your domain status, and alerts you when renewal is due
-Author: Huston Malande, Brian Wangila
+Description: A simple Whois utility plugin that keeps you informed concerning your domain status and alerts you when renewal is due
+Author: Skyline Design Ltd
 Version: 1.0
 Author URI: http://skylinedesign.co.ke/martians
 License: GPL2
@@ -59,13 +59,14 @@ class DomainStatus {
 	}
 
 	function format_expiry() {
-		$this->expiry_date = strtotime( $this->expiry_date );
-		$this->expiry_date = date( 'jS F Y', $this->expiry_date );
+		$this->expiry_date_time = strtotime( $this->expiry_date );
+		$this->expiry_date = date( 'jS F Y', $this->expiry_date_time );
 	}
 	
 	function highlight_class() {
+		
 		$now = time();
-		$time_diff = $this->expiry_date - $now;
+		$time_diff = $this->expiry_date_time - $now;
 		$days_diff = intval( $time_diff / ( 60 * 60 * 24 ) );
 		
 		if ( $days_diff < 0 ) {
@@ -77,6 +78,7 @@ class DomainStatus {
 		}
 	}
 }
+
 
 /**	Cron jobs */
 
@@ -105,9 +107,6 @@ register_deactivation_hook( __FILE__, 'domainobot_deactivation' );
 function domainobot_deactivation() {
 	// clear cron
 	wp_clear_scheduled_hook( 'domainobot_whois_update' );
-	delete_option( 'domainobot_show_current_op' );
-	delete_option( 'domainobot_current_expiry_op' );
-	delete_option( 'domainobot_days_left_op' );
 }
 
 //	clean up after deletion
@@ -116,6 +115,9 @@ register_uninstall_hook( __FILE__, 'domainobot_deletion' );
 function domainobot_deletion() {
 	// clear db values
 	delete_option( 'domainobot_list_op' );
+	delete_option( 'domainobot_show_current_op' );
+	delete_option( 'domainobot_current_expiry_op' );
+	delete_option( 'domainobot_days_left_op' );
 }
 
 
