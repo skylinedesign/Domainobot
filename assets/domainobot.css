@@ -32,6 +32,26 @@
 	color: #F00;
 }
 
+#domainobot-table tr span {
+	opacity: 0;
+	float: right;
+	padding: 0px 12px;
+	border-radius: 3px;
+	background: #CCC;
+	color: white;
+	line-height: 19px;
+	font-size: 11px;
+	text-transform: lowercase;
+	-webkit-transition: all 0.3s ease-in-out;
+	-moz-transition: all 0.3s ease-in-out;
+	-o-transition: all 0.3s ease-in-out;
+	transition: all 0.3s ease-in-out;
+}
+
+#domainobot-table tr:hover span {
+	opacity: 1;
+}
+
 .form-table th {
 	padding: 9px;
 }

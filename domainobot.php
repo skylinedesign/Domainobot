@@ -49,6 +49,7 @@ class DomainStatus {
 			$query = $this->domain;
 			$this->result = $whois->Lookup( $query );
 			$this->expiry_date = $this->result['regrinfo']['domain']['expires'];
+			$this->status = $this->result['regrinfo']['domain']['status'];
 		}
 		
 		// format date
@@ -67,12 +68,12 @@ class DomainStatus {
 		
 		$now = time();
 		$time_diff = $this->expiry_date_time - $now;
-		$days_diff = intval( $time_diff / ( 60 * 60 * 24 ) );
-		$days_left = get_option( 'domainobot_days_left_op' );
+		$this->days_diff = intval( $time_diff / ( 60 * 60 * 24 ) );
+		$days_left_op = get_option( 'domainobot_days_left_op' );
 		
-		if ( $days_diff < 0 ) {
+		if ( $this->days_diff < 0 ) {
 			$this->highlight_class = esc_attr( 'expired' );
-		} elseif ( $days_diff > 0 && $days_diff < $days_left ) {
+		} elseif ( $this->days_diff > 0 && $this->days_diff < $days_left_op ) {
 			$this->highlight_class = esc_attr( 'soon' );
 		} else {
 			$this->highlight_class = esc_attr( 'safe' );
@@ -92,7 +93,7 @@ function domainobot_activation() {
 
 function domainobot_update_whois_daily() {
 	// run every 24hrs
-	$domain_status = new DomainStatus( $domain );
+	$domain_status = new DomainStatus();
 	$domain_expiry = $domain_status->expiry_date;
 	update_option( 'domainobot_current_expiry_op', $domain_expiry );
 }
@@ -124,10 +125,10 @@ function domainobot_deletion() {
 
 /**	Global settings */
 
-/* 	extract 'days left' option */
+// 	extract 'days left' option
 $days_left_op = get_option( 'domainobot_days_left_op' );
 
-/* 	extract 'current domain' option */
+// 	extract 'current domain' option
 $show_current  = get_option( 'domainobot_show_current_op' );
 
 
@@ -152,9 +153,18 @@ if ($show_current == 1) {
 	
 	// function for output
 	function domainobot_current_domain() {
+		
+		$current_expiry_cached = get_option( 'domainobot_current_expiry_op' );
+
 		// $domain = 'put_your_test_domain_here_and_uncomment';
-		$domain_status = new DomainStatus( $domain );
-		echo '<p id="domainobot-bar" class="' . $domain_status->highlight_class . '">Domain renewal: ' . esc_html( $domain_status->expiry_date ) . '</p>';
+		if ( $current_expiry_cached == '' || $current_expiry_cached == '1st January 1970' ) { 
+			$domain_status = new DomainStatus( $domain );
+			$domain_expiry = $domain_status->expiry_date;
+			update_option( 'domainobot_current_expiry_op', $domain_expiry );
+			$current_expiry_cached = $domain_expiry;
+		}
+
+		echo '<p id="domainobot-bar" class="' . $domain_status->highlight_class . '">Domain renewal: ' . esc_html( $current_expiry_cached ) . '</p>';
 	}
 
 	// hook up the output
@@ -244,9 +254,17 @@ function domainobot_dashboard_widget() {
 			 
 			$domain_status = new DomainStatus( $domain );
 			
+			if ( $domain_status->highlight_class == 'expired' ) {
+				$info = '<span>' . $domain_status->status . '</span>';
+			} elseif ( $domain_status->highlight_class == 'soon' ) {
+				$info = '<span>' . $domain_status->days_diff . ' days</span>';
+			} else {
+				$info= '';
+			}
+			
 			echo	'<tr class="'. $domain_status->highlight_class .'">
 						<th scope="row"><a href="'. esc_url( $domain ) .'">' . esc_html( $domain ) . '</a></th>
-						<td>' . esc_html( $domain_status->expiry_date ) . '</td>
+						<td>' . esc_html( $domain_status->expiry_date ) . ' ' . $info . '</td>
 					</tr>';
 		}		
 		
