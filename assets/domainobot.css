@@ -7,13 +7,19 @@
 	padding: 4px 15px 2px;
 	margin: 0;
 	background: #F8F8F8;
+	color: #888;
 	font-size: 11px;
 }
 
 #domainobot-bar.soon,
 #domainobot-bar.expired {
 	border-color: #CCC;
+	color: #333;
 	background: #FFE8E8;
+}
+
+.settings_page_domainobot-domainobot #domainobot-bar {
+	margin-right: 24px;
 }
 
 #domainobot-table tr {
@@ -41,7 +47,6 @@
 	color: white;
 	line-height: 19px;
 	font-size: 11px;
-	text-transform: lowercase;
 	-webkit-transition: all 0.3s ease-in-out;
 	-moz-transition: all 0.3s ease-in-out;
 	-o-transition: all 0.3s ease-in-out;
