@@ -160,6 +160,7 @@ if ($show_current == 1) {
 
 		// $domain = 'put_your_test_domain_here_and_uncomment';
 		if ( $current_expiry_cached == '' || $current_expiry_cached == '1st January 1970' ) { 
+			$domain = str_replace( "www.", "", $_SERVER['HTTP_HOST'] );
 			$domain_status = new DomainStatus( $domain );
 			$domain_expiry = $domain_status->expiry_date;
 			update_option( 'domainobot_current_expiry_op', $domain_expiry );
