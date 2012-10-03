@@ -57,11 +57,12 @@
 	opacity: 1;
 }
 
-.form-table th {
+#domainobot-table th {
 	padding: 9px;
+	width: auto;
 }
 
-.form-table td {
+#domainobot-table td {
 	padding: 7px 10px;
 }
 

@@ -89,7 +89,9 @@ register_activation_hook( __FILE__, 'domainobot_activation' );
 
 function domainobot_activation() {
 	wp_schedule_event( current_time( 'timestamp' ), 'daily', 'domainobot_whois_update' );
+	// default option values
 	update_option( 'domainobot_days_left_op', 30 );
+	update_option( 'domainobot_show_current_op', 1 );
 }
 
 function domainobot_update_whois_daily() {
