@@ -1,0 +1,93 @@
+#domainobot-bar {
+	float: right;
+	border: 1px solid #EEE;
+	border-top: none;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+	padding: 4px 15px 2px;
+	margin: 0;
+	background: #F8F8F8;
+	color: #888;
+	font-size: 11px;
+}
+
+#domainobot-bar.soon,
+#domainobot-bar.expired {
+	border-color: #CCC;
+	color: #333;
+	background: #FFE8E8;
+}
+
+.settings_page_domainobot-domainobot #domainobot-bar {
+	margin-right: 24px;
+}
+
+#domainobot-table tr {
+	border-bottom: 1px solid #EEE;
+}
+
+#domainobot-table tr:last-child {
+	border-bottom: none;
+}
+
+#domainobot-table tr.soon {
+	color: #E66F00;
+}
+
+#domainobot-table tr.expired {
+	color: #F00;
+}
+
+#domainobot-table tr span {
+	opacity: 0;
+	float: right;
+	padding: 0px 12px;
+	border-radius: 3px;
+	background: #CCC;
+	color: white;
+	line-height: 19px;
+	font-size: 11px;
+	-webkit-transition: all 0.3s ease-in-out;
+	-moz-transition: all 0.3s ease-in-out;
+	-o-transition: all 0.3s ease-in-out;
+	transition: all 0.3s ease-in-out;
+}
+
+#domainobot-table tr:hover span {
+	opacity: 1;
+}
+
+#domainobot-table th {
+	padding: 9px;
+	width: auto;
+}
+
+#domainobot-table td {
+	padding: 7px 10px;
+}
+
+.domainobot_error {
+	padding: 5px 33px 5px;
+	margin: 0;
+	border-bottom: 1px solid #EEE;
+	background: url(error.png) no-repeat 9px center;
+	color: #555;
+}
+
+a.no-underline {
+	text-decoration: none;
+}
+
+a.no-underline:hover {
+	text-decoration: underline;
+}
+
+#wp-admin-bar-domainobot span {
+	background: #CCC;
+	text-shadow: none;
+	color: #333;
+	font-size: 11px;
+	padding: 1px 5px;
+	border-radius: 10px;
+	margin-left: 3px;
+}
