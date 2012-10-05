@@ -45,27 +45,41 @@ class Domainobot {
 		// clean up after deletion
 		register_uninstall_hook( __FILE__, 'domainobot_deletion' );
 
+		$this->expirers_count = $this->count_expirers();
+		
 		//	hook up the css
-		add_action( 'admin_print_styles', array( $this, 'domainobot_css' ) );
+		if ( $this->expirers_count != 0 ) {
+			if ( is_admin() ) {
+				add_action( 'admin_print_styles', array( $this, 'domainobot_css' ) );
+			} else {
+				add_action( 'wp_head', array( $this, 'domainobot_css' ) );
+			}
+			
+			add_action( 'admin_bar_menu', array( $this, 'domainobot_notif_link' ), 999 );
 
+		} else {
+			add_action( 'admin_print_styles', array( $this, 'domainobot_css' ) );
+		}
+	
 		//	hook up options page
 		add_action( 'admin_menu', array( $this, 'domainobot_options' ) );
+		
 	}
 
 
 	// display current domain at the top right
 	public function domainobot_current_domain() {
 
-		$cache = $this->options['domains']['current_expiry'];
+		$current_cache = $this->options['domains']['current_expiry'];
 
 		// $domain = 'put_your_test_domain_here_and_uncomment';
-		if ( $cache == '' || $cache == '1st January 1970' ) {
+		if ( $current_cache == '' || $current_cache == '1st January 1970' ) {
 			$domain = str_replace( "www.", "", $_SERVER['HTTP_HOST'] );
 			$domain_status = new DomainStatus( $domain );
-			$cache = $this->options['domains']['current_expiry'] = $domain_status->expiry_date;
+			$current_cache = $this->options['domains']['current_expiry'] = $domain_status->expiry_date;
 			update_option( 'domainobot_options', $this->options );
-			if ( $cache == '1st January 1970' ) {
-				$cache = 'unknown';
+			if ( $current_cache == '1st January 1970' ) {
+				$current_cache = 'unknown';
 			}
 		}
 
@@ -79,16 +93,17 @@ class Domainobot {
 		wp_schedule_event( current_time( 'timestamp' ), 'daily', 'domainobot_whois_update' );
 		// default option values
 		$this->options = array(
-							'countdown' => 30,
-							'domains' => array(
-								'show_current' => 1,
-								'current_expiry' => '',
-								'listed' => array(),
-								'expiry_dates' => array(),
-								'classes' => array()
-							)
-						);
-		// create database field then store
+			'countdown'	=> 30,
+			'domains'	=> array(
+				'show_current'		=> 1,
+				'current_expiry'	=> '',
+				'listed'			=> array(),
+				'expiry_dates'		=> array(),
+				'classes'			=> array()
+			)
+		);
+		
+		// store serialized options
 		update_option( 'domainobot_options', $this->options );
 	}
 
@@ -115,7 +130,7 @@ class Domainobot {
 
 	//	css file
 	public function domainobot_css() {
-		wp_register_style( 'domainobot-style', plugins_url( 'assets/domainobot.css', __FILE__ ) );
+		wp_register_style( 'domainobot-style', plugins_url( 'assets/style.css', __FILE__ ) );
 		wp_enqueue_style( 'domainobot-style' );
 	}
 
@@ -126,10 +141,10 @@ class Domainobot {
 			<h2>Domainobot Settings</h2>
 			<?php
 			if ( isset( $_POST['Submit'] ) ) {
-				$domains_listed_saved = $_POST["domainobot_listed"];
+				$domains_listed_saved = $_POST['domainobot_listed'];
 				$this->cache_domains( $domains_listed_saved );
-				$this->options['domains']['show_current'] = intval( $_POST["domainobot_show_current"] );
-				$this->options['countdown'] = intval( $_POST["domainobot_countdown"] );
+				$this->options['domains']['show_current'] = intval( $_POST['domainobot_show_current'] );
+				$this->options['countdown'] = intval( $_POST['domainobot_countdown'] );
 				update_option( 'domainobot_options', $this->options ); ?>
 				<div class="updated">
 					<p><strong><?php _e( 'Options saved.', 'mt_trans_domain' ); ?></strong></p>
@@ -201,8 +216,8 @@ class Domainobot {
 					$domains['expiry_dates'][$i] = "unknown";
 				}
 
-				echo	'<tr class="'. $domains['classes'][$i] .'">
-							<th scope="row"><a href="'. esc_url( $domains['listed'][$i] ) .'">' . esc_html( $domains['listed'][$i] ) . '</a></th>
+				echo	'<tr class="' . $domains['classes'][$i] . '">
+							<th scope="row"><a href="' . esc_url( $domains['listed'][$i] ) . '">' . esc_html( $domains['listed'][$i] ) . '</a></th>
 							<td>' . esc_html( $domains['expiry_dates'][$i] ) . ' <span>' . $hover_info . '</span></td>
 						</tr>';
 			}
@@ -217,14 +232,14 @@ class Domainobot {
 
 	//	add dashboard widget
 	function domainobot_add_dashboard_widget() {
-		wp_add_dashboard_widget( 'domainobot_dashboard_widget', 'Renewal Tracker <small>- Domainobot &trade;</small>', array( $this, 'domainobot_dashboard_widget') );
+		wp_add_dashboard_widget( 'domainobot_dashboard_widget', 'Renewal Tracker <small>- Domainobot &trade;</small>', array( $this, 'domainobot_dashboard_widget' ) );
 	}
 
 	// validate domains
 	function validate_domain( $domain ) {
 		if ( ! empty( $domain ) && $domain != '' ) {
 
-			$domain = strtolower( trim( $domain ));
+			$domain = strtolower( trim( $domain ) );
 			$domain = preg_replace( '/^http:\/\//i', '', $domain );
 			$domain = preg_replace( '/^www\./i', '', $domain );
 			$domain = explode( '/', $domain );
@@ -240,7 +255,7 @@ class Domainobot {
 	
 	// cache dates, valid domains, and css classes
 	function cache_domains( $domains_listed ) {
-		$domain_array = explode( "\n", $domains_listed );
+		$domain_array = explode( "\n", trim( $domains_listed ) );
 		if ( $domain_array != NULL ) {
 			$domains = array();
 			foreach ( $domain_array as $domain ) {
@@ -264,6 +279,7 @@ class Domainobot {
 					$this->options['domains']['classes'][$i] = '';
 				}
 			}
+			
 		}
 	}
 	
@@ -272,6 +288,35 @@ class Domainobot {
 		$unix_expiry_date = strtotime( $expiry_date );
 		$days_left = intval( ( $unix_expiry_date - time() ) / ( 60 * 60 * 24 ) );
 		return $days_left;
+	}
+	
+	// generate notification link
+	function domainobot_notif_link( $wp_admin_bar ) {
+		global $wp_admin_bar;
+		
+		$text = 'Expiry <span>' . $this->expirers_count . '</span>';
+		
+		$args = array(
+			'id' => 'domainobot',
+			'parent' => 'top-secondary',
+			'title' => $text,
+			'href' => admin_url( 'index.php#domainobot_dashboard_widget' ),
+			'meta' => array( 'title' => 'Domainobot alert' )
+		);
+		$wp_admin_bar->add_node( $args );
+		
+	}
+	
+	// count expired and expiring domains
+	function count_expirers() {
+		$domainobot_classes = $this->options['domains']['classes'];
+		$expirers = 0;
+		foreach ( $domainobot_classes as $class ) {
+			if ( $class == 'expired' ||  $class == 'soon' ) {
+				$expirers++;
+			}
+		}
+		return $expirers;
 	}
 	
 }

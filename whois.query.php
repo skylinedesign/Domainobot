@@ -51,7 +51,7 @@ class DomainStatus {
 		// format date
 		$unix_expiry_date = strtotime( $this->expiry_date );
 		$this->expiry_date = date( 'jS F Y', $unix_expiry_date );
-		$this->days_to_expiry = intval(( $unix_expiry_date - time() ) / ( 60 * 60 * 24 ));
+		$this->days_to_expiry = intval( ( $unix_expiry_date - time() ) / ( 60 * 60 * 24 ) );
 
 		// get highlight class
 		$this->highlight_class();
