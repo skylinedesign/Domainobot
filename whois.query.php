@@ -58,11 +58,12 @@ class DomainStatus {
 	}
 
 	private function highlight_class() {
-		$days_left_op = get_option( 'domainobot_days_left_op' );
+		$options = get_option( 'domainobot_options' );
+		$days_left = $options['countdown'];
 
 		if ( $this->days_to_expiry < 0 ) {
 			$this->highlight_class = esc_attr( 'expired' );
-		} elseif ( $this->days_to_expiry > 0 && $this->days_to_expiry < $days_left_op ) {
+		} elseif ( $this->days_to_expiry > 0 && $this->days_to_expiry < $days_left ) {
 			$this->highlight_class = esc_attr( 'soon' );
 		} else {
 			$this->highlight_class = esc_attr( 'safe' );
