@@ -316,7 +316,7 @@ class Domainobot {
 	function domainobot_notif_link( $wp_admin_bar ) {
 		global $wp_admin_bar;
 		
-		$text = 'Expiry <span>' . $this->expirers_count . '</span>';
+		$text = 'Expiring Domains <span>' . $this->expirers_count . '</span>';
 		$title = 'Domainobot is concerned about ' . $this->expirers_count . ' domains';
 		
 		$args = array(
