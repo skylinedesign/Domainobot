@@ -295,13 +295,14 @@ class Domainobot {
 		global $wp_admin_bar;
 		
 		$text = 'Expiry <span>' . $this->expirers_count . '</span>';
+		$title = 'Domainobot is concerned about ' . $this->expirers_count . ' domains';
 		
 		$args = array(
 			'id' => 'domainobot',
 			'parent' => 'top-secondary',
 			'title' => $text,
 			'href' => admin_url( 'index.php#domainobot_dashboard_widget' ),
-			'meta' => array( 'title' => 'Domainobot alert' )
+			'meta' => array( 'title' => $title )
 		);
 		$wp_admin_bar->add_node( $args );
 		
