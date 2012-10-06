@@ -63,7 +63,9 @@ class Domainobot {
 	
 		//	hook up options page
 		add_action( 'admin_menu', array( $this, 'domainobot_options' ) );
-		
+
+		// hook up settings link
+		add_filter('plugin_action_links', array( $this, 'domainobot_action_links'), 10, 2);
 	}
 
 
@@ -84,6 +86,26 @@ class Domainobot {
 		}
 
 		echo '<p id="domainobot-bar" class="' . $domain_status->highlight_class . '">Domain renewal: ' . esc_html( $current_cache ) . '</p>';
+	}
+
+
+	// Settings link on domain activation
+	public function domainobot_action_links($links, $file) {
+		static $this_plugin;
+	 
+		if (!$this_plugin) {
+			$this_plugin = plugin_basename(__FILE__);
+		}
+	 
+		// check to make sure we are on the correct plugin
+		if ($file == $this_plugin) {
+			// the anchor tag and href to the URL we want. For a "Settings" link, this needs to be the url of your settings page
+			$settings_link = '<a href="' . menu_page_url( 'domainobot/domainobot.php', false ) . '">Settings</a>';
+			// add the link to the list
+			array_unshift($links, $settings_link);
+		}
+	 
+		return $links;
 	}
 
 
