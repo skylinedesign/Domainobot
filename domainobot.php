@@ -254,7 +254,7 @@ class Domainobot {
 
 	//	add dashboard widget
 	function domainobot_add_dashboard_widget() {
-		wp_add_dashboard_widget( 'domainobot_dashboard_widget', 'Renewal Tracker <small>- Domainobot &trade;</small>', array( $this, 'domainobot_dashboard_widget' ) );
+		wp_add_dashboard_widget( 'domainobot_dashboard_widget', 'Renewal Tracker <small>- Domainobot</small>', array( $this, 'domainobot_dashboard_widget' ) );
 	}
 
 	// validate domains
